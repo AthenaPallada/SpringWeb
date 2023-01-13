@@ -15,5 +15,7 @@ public interface  RecipeService {
 
     Map<Long, Recipe> getAllRecipes();
 
-    Map<Long, Recipe> getRecipesByIngredientId(long id1, long id2);
+    Map<Long, Recipe> getRecipesByIngredientId(Long id1, Long id2);
+
+    Map<Long, Recipe> getListOfRecipes(byte page);
 }
