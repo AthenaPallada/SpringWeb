@@ -1,10 +1,15 @@
 package me.tatiana.springweb.ipml;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import me.tatiana.springweb.model.Recipe;
 import me.tatiana.springweb.services.RecipeService;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -12,11 +17,20 @@ public class RecipeServiceImpl implements RecipeService {
     private static Map<Long, Recipe> recipes = new TreeMap<>();
     private static long recipeId = 1;
 
+    private FileServiceImpl fileService;
+    @Value("${recipe.file.name}")
+    private String fileName;
+
+    public RecipeServiceImpl(FileServiceImpl fileService) {
+        this.fileService = fileService;
+    }
+
     @Override
     public long addRecipe(Recipe recipe) {
-        recipes.put(recipeId++, recipe);
+        recipes.put(recipeId, recipe);
         return recipeId++;
     }
+
     @Override
     public Recipe getRecipe(long key) {
         return recipes.get(key);
@@ -76,5 +90,24 @@ public class RecipeServiceImpl implements RecipeService {
             }
         }
         return recipesByPage;
+    }
+
+    private void safeToFile() {
+        try {
+            String json = new ObjectMapper().writeValueAsString(recipes);
+            fileService.saveToFile(json, fileName);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void readFromFile() {
+        try {
+            String json = fileService.readFromFile(fileName);
+            recipes = new ObjectMapper().readValue(json, new TypeReference<Map<Long, Recipe>>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

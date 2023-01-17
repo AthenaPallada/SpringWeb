@@ -13,5 +13,6 @@ public interface IngredientService {
 
     boolean removeIngredient(long id);
 
+
     Map<Long, Ingredient> getAllIngredients();
 }
