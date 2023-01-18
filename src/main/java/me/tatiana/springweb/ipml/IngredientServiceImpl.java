@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
+
 @Service
 public class IngredientServiceImpl implements IngredientService {
     private static Map<Long, Ingredient> ingredients = new TreeMap<>();
@@ -28,9 +29,10 @@ public class IngredientServiceImpl implements IngredientService {
     @Override
     public long addIngredient(Ingredient ingredient) {
         ingredients.put(ingredientId++, ingredient);
-        safeToFile();
+        saveToFile();
         return ingredientId++;
     }
+
     @Override
     public Ingredient getIngredient(long key) {
         return ingredients.get(key);
@@ -40,22 +42,24 @@ public class IngredientServiceImpl implements IngredientService {
     public Ingredient editIngredient(Ingredient ingredient, long id) {
         if (ingredients.containsKey(id)) {
             ingredients.put(id, ingredient);
-            safeToFile();
+            saveToFile();
             return ingredient;
         }
         return null;
     }
+
     @Override
     public boolean removeIngredient(long id) {
         Ingredient ingredient = ingredients.remove(id);
         return ingredient != null;
     }
+
     @Override
     public Map<Long, Ingredient> getAllIngredients() {
         return ingredients;
     }
 
-    private void safeToFile() {
+    private void saveToFile() {
         try {
             String json = new ObjectMapper().writeValueAsString(ingredients);
             fileService.saveToFile(json, fileName);

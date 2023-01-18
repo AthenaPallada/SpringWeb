@@ -16,8 +16,8 @@ import java.util.*;
 public class RecipeServiceImpl implements RecipeService {
     private static Map<Long, Recipe> recipes = new TreeMap<>();
     private static long recipeId = 1;
-
     private FileServiceImpl fileService;
+
     @Value("${recipe.file.name}")
     private String fileName;
 
@@ -28,6 +28,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public long addRecipe(Recipe recipe) {
         recipes.put(recipeId, recipe);
+        saveToFile();
         return recipeId++;
     }
 
@@ -40,6 +41,7 @@ public class RecipeServiceImpl implements RecipeService {
     public Recipe editRecipe(Recipe recipe, long id) {
         if (recipes.containsKey(id)) {
             recipes.put(id, recipe);
+            saveToFile();
             return recipe;
         }
         return null;
@@ -92,7 +94,7 @@ public class RecipeServiceImpl implements RecipeService {
         return recipesByPage;
     }
 
-    private void safeToFile() {
+    private void saveToFile() {
         try {
             String json = new ObjectMapper().writeValueAsString(recipes);
             fileService.saveToFile(json, fileName);
