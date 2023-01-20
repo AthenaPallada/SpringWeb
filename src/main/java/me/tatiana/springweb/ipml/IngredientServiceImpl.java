@@ -3,6 +3,7 @@ package me.tatiana.springweb.ipml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NoArgsConstructor;
 import me.tatiana.springweb.model.Ingredient;
 import me.tatiana.springweb.services.IngredientService;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,9 +20,8 @@ public class IngredientServiceImpl implements IngredientService {
     private static long ingredientId = 1;
 
     private FileServiceImpl fileService;
-    @Value("${ingredient.file.name}")
-    private String fileName;
-
+    @Value("${ingredients.file.name}")
+    private String filePath;
     public IngredientServiceImpl(FileServiceImpl fileService) {
         this.fileService = fileService;
     }
@@ -62,7 +62,7 @@ public class IngredientServiceImpl implements IngredientService {
     private void saveToFile() {
         try {
             String json = new ObjectMapper().writeValueAsString(ingredients);
-            fileService.saveToFile(json, fileName);
+            fileService.saveToFile(json, filePath);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -70,7 +70,7 @@ public class IngredientServiceImpl implements IngredientService {
 
     private void readFromFile() {
         try {
-            String json = fileService.readFromFile(fileName);
+            String json = fileService.readFromFile(filePath);
             ingredients = new ObjectMapper().readValue(json, new TypeReference<Map<Long, Ingredient>>() {
             });
         } catch (IOException e) {
@@ -78,8 +78,8 @@ public class IngredientServiceImpl implements IngredientService {
         }
     }
 
-    @PostConstruct
-    private void primalReader() {
-        fileService.readFromFile(fileName);
-    }
+//    @PostConstruct
+//    private void primalReader() {
+//        fileService.readFromFile(filePath);
+//    }
 }

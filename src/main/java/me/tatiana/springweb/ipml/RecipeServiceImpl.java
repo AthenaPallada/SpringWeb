@@ -9,6 +9,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 
@@ -18,8 +19,8 @@ public class RecipeServiceImpl implements RecipeService {
     private static long recipeId = 1;
     private FileServiceImpl fileService;
 
-    @Value("${recipe.file.name}")
-    private String fileName;
+    @Value("${recipes.file.path}")
+    private String filePath;
 
     public RecipeServiceImpl(FileServiceImpl fileService) {
         this.fileService = fileService;
@@ -97,7 +98,7 @@ public class RecipeServiceImpl implements RecipeService {
     private void saveToFile() {
         try {
             String json = new ObjectMapper().writeValueAsString(recipes);
-            fileService.saveToFile(json, fileName);
+            fileService.saveToFile(json, filePath);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -105,11 +106,16 @@ public class RecipeServiceImpl implements RecipeService {
 
     private void readFromFile() {
         try {
-            String json = fileService.readFromFile(fileName);
+            String json = fileService.readFromFile(filePath);
             recipes = new ObjectMapper().readValue(json, new TypeReference<Map<Long, Recipe>>() {
             });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @PostConstruct
+    private void primalReader() {
+        fileService.readFromFile(filePath);
     }
 }
