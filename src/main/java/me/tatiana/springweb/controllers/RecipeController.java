@@ -1,5 +1,6 @@
 package me.tatiana.springweb.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,9 +11,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import me.tatiana.springweb.ipml.RecipeServiceImpl;
 import me.tatiana.springweb.model.Recipe;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -106,5 +110,18 @@ public class RecipeController {
             return ResponseEntity.ok(recipesList);
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @Operation(summary = "Добавление рецепта из файла")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Успех")})
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> addRecipeFromFile(@RequestParam MultipartFile recipe) {
+        try {
+            Recipe dataRecipe = new ObjectMapper().readValue(recipe.getInputStream(), Recipe.class);
+            addRecipe(dataRecipe);
+            return ResponseEntity.ok().build();
+        } catch (IOException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

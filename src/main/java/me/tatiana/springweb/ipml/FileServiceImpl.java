@@ -1,5 +1,6 @@
 package me.tatiana.springweb.ipml;
 
+import me.tatiana.springweb.exception.Response500Exception;
 import me.tatiana.springweb.services.FilesService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ public class FileServiceImpl implements FilesService {
     private String recipesFilePath;
     @Value("${ingredients.file.name}")
     private String ingredientsFilePath;
+
+    @Value("${user.recipes.file.path}")
+    private String userRecipesFilePath;
 
     @Override
     public boolean saveToFile(String json, String filePath) {
@@ -33,7 +37,7 @@ public class FileServiceImpl implements FilesService {
         try {
             return Files.readString(Path.of(filePath));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new Response500Exception("Ошибка записи в базу данных", e);
         }
     }
 
@@ -56,5 +60,9 @@ public class FileServiceImpl implements FilesService {
 
     public File getIngredientDataFilePath() {
         return new File(ingredientsFilePath);
+    }
+
+    public File getUserRecipesDataFilePath() {
+        return new File(userRecipesFilePath);
     }
 }

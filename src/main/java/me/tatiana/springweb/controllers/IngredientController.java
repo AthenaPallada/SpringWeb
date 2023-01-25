@@ -26,9 +26,10 @@ public class IngredientController {
     }
 
     @Operation(summary = "Добавление ингредиента")
-    @ApiResponses(value = {@ApiResponse(responseCode = "222", description = "Улет",
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "ингредиент был успешно отредактирован",
             content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = Ingredient.class)))})})
+                    array = @ArraySchema(schema = @Schema(implementation = Ingredient.class)))}),
+    })
     @PostMapping
     public ResponseEntity<Long> ingredient(@RequestBody Ingredient ingredient) {
         long id = ingredientService.addIngredient(ingredient);

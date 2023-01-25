@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NoArgsConstructor;
+import me.tatiana.springweb.exception.Response500Exception;
 import me.tatiana.springweb.model.Ingredient;
 import me.tatiana.springweb.services.IngredientService;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +18,7 @@ import java.util.TreeMap;
 @Service
 public class IngredientServiceImpl implements IngredientService {
     private static Map<Long, Ingredient> ingredients = new TreeMap<>();
-    private static long ingredientId = 1;
+   // private static long ingredientId = 1;
 
     private FileServiceImpl fileService;
     @Value("${ingredients.file.name}")
@@ -28,9 +29,11 @@ public class IngredientServiceImpl implements IngredientService {
 
     @Override
     public long addIngredient(Ingredient ingredient) {
-        ingredients.put(ingredientId++, ingredient);
+        //ingredients.put(ingredientId++, ingredient);
+        long count = ingredients.size();
+        ingredients.put(count, ingredient);
         saveToFile();
-        return ingredientId++;
+        return count;
     }
 
     @Override
@@ -64,7 +67,7 @@ public class IngredientServiceImpl implements IngredientService {
             String json = new ObjectMapper().writeValueAsString(ingredients);
             fileService.saveToFile(json, filePath);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new Response500Exception("Ошибка преобразования json файла", e);
         }
     }
 
@@ -74,12 +77,12 @@ public class IngredientServiceImpl implements IngredientService {
             ingredients = new ObjectMapper().readValue(json, new TypeReference<Map<Long, Ingredient>>() {
             });
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new Response500Exception("Ошибка записи в базу данных", e);
         }
     }
 
-//    @PostConstruct
-//    private void primalReader() {
-//        fileService.readFromFile(filePath);
-//    }
+    @PostConstruct
+    private void primalReader() {
+        fileService.readFromFile(filePath);
+    }
 }

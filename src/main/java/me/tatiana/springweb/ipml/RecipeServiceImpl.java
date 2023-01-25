@@ -3,6 +3,8 @@ package me.tatiana.springweb.ipml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.tatiana.springweb.exception.Response500Exception;
+import me.tatiana.springweb.model.Ingredient;
 import me.tatiana.springweb.model.Recipe;
 import me.tatiana.springweb.services.RecipeService;
 import org.apache.commons.lang3.ObjectUtils;
@@ -16,11 +18,14 @@ import java.util.*;
 @Service
 public class RecipeServiceImpl implements RecipeService {
     private static Map<Long, Recipe> recipes = new TreeMap<>();
-    private static long recipeId = 1;
+    //private static long recipeId = 1;
     private FileServiceImpl fileService;
 
     @Value("${recipes.file.path}")
     private String filePath;
+
+    @Value("${user.recipes.file.path}")
+    private String userFilePath;
 
     public RecipeServiceImpl(FileServiceImpl fileService) {
         this.fileService = fileService;
@@ -28,9 +33,10 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public long addRecipe(Recipe recipe) {
-        recipes.put(recipeId, recipe);
+        long count = recipes.size();
+        recipes.put(count, recipe);
         saveToFile();
-        return recipeId++;
+        return count;
     }
 
     @Override
@@ -51,6 +57,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public boolean removeRecipe(long id) {
         Recipe recipe = recipes.remove(id);
+        saveToFile();
         return recipe != null;
     }
 
@@ -99,8 +106,9 @@ public class RecipeServiceImpl implements RecipeService {
         try {
             String json = new ObjectMapper().writeValueAsString(recipes);
             fileService.saveToFile(json, filePath);
+            fileService.saveToFile(getFormattedRecipes(), userFilePath);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new Response500Exception("Ошибка преобразования json файла", e);
         }
     }
 
@@ -110,12 +118,31 @@ public class RecipeServiceImpl implements RecipeService {
             recipes = new ObjectMapper().readValue(json, new TypeReference<Map<Long, Recipe>>() {
             });
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new Response500Exception("Ошибка записи в базу данных", e);
         }
+    }
+
+    private String getFormattedRecipes() {
+        StringBuilder value = new StringBuilder();
+        for (Recipe recipe : recipes.values()) {
+            byte i = 0;
+            value.append(recipe.getName() + "\n");
+            value.append("Время приготовления: " + recipe.getCookingTime() + " минут\nИнгредиенты:\n");
+            for (Ingredient ingredient : recipe.getIngredients().values()) {
+                value.append("     " + ingredient.getName() + " - " + ingredient.getQuantity() + " " + ingredient.getMeasureUnit() + "\n");
+            }
+            value.append("Инструкция приготовления:\n");
+            for (String step : recipe.getSteps()) {
+                value.append("     " + ++i + ". " + step + "\n");
+            }
+            value.append("\n");
+        }
+        return value.toString();
     }
 
     @PostConstruct
     private void primalReader() {
-        fileService.readFromFile(filePath);
+        readFromFile();
+        fileService.saveToFile(getFormattedRecipes(), userFilePath);
     }
 }

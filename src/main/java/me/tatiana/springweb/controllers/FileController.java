@@ -27,10 +27,13 @@ public class FileController {
     }
 
     @Operation(summary = "Выгрузка списка рецептов")
-    @ApiResponses(value = {@ApiResponse(responseCode = "222", description = "Улет")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "всё хорошо, запрос выполнился"),
+            @ApiResponse(responseCode = "400", description = "есть ошибка в параметрах запроса"),
+            @ApiResponse(responseCode = "404", description = "URL неверный или такого действия нет в веб-приложении"),
+            @ApiResponse(responseCode = "500", description = "во время выполнения запроса произошла ошибка на сервере")})
     @GetMapping(value = "/export")
     public ResponseEntity<InputStreamResource> downloadRecipesDataFile() throws FileNotFoundException {
-        File dataFile = fileService.getRecipesDataFilePath();
+        File dataFile = fileService.getUserRecipesDataFilePath();
         if (dataFile.exists()) {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(dataFile));
             return ResponseEntity.ok()
@@ -44,7 +47,10 @@ public class FileController {
     }
 
     @Operation(summary = "Загрузка рецептов")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Успех")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "всё хорошо, запрос выполнился"),
+            @ApiResponse(responseCode = "400", description = "есть ошибка в параметрах запроса"),
+            @ApiResponse(responseCode = "404", description = "URL неверный или такого действия нет в веб-приложении"),
+            @ApiResponse(responseCode = "500", description = "во время выполнения запроса произошла ошибка на сервере")})
     @PostMapping(value = "/import/recipes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> uploadRecipesDataFile(@RequestParam MultipartFile file) {
         fileService.cleanFile(fileService.getRecipesDataFilePath().getPath());
@@ -59,7 +65,10 @@ public class FileController {
     }
 
     @Operation(summary = "Загрузка ингредиентов")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Успех")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "всё хорошо, запрос выполнился"),
+            @ApiResponse(responseCode = "400", description = "есть ошибка в параметрах запроса"),
+            @ApiResponse(responseCode = "404", description = "URL неверный или такого действия нет в веб-приложении"),
+            @ApiResponse(responseCode = "500", description = "во время выполнения запроса произошла ошибка на сервере")})
     @PostMapping(value = "/import/ingredients", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> uploadIngredientsDataFile(@RequestParam MultipartFile file) {
         fileService.cleanFile(fileService.getIngredientDataFilePath().getPath());
