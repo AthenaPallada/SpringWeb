@@ -29,7 +29,6 @@ public class IngredientServiceImpl implements IngredientService {
 
     @Override
     public long addIngredient(Ingredient ingredient) {
-        //ingredients.put(ingredientId++, ingredient);
         long count = ingredients.size();
         ingredients.put(count, ingredient);
         saveToFile();

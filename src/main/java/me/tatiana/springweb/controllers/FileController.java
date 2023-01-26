@@ -26,13 +26,33 @@ public class FileController {
         this.fileService = fileService;
     }
 
-    @Operation(summary = "Скачивание списка рецептов")
+    @Operation(summary = "Выгрузка списка рецептов")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "всё хорошо, запрос выполнился"),
             @ApiResponse(responseCode = "400", description = "есть ошибка в параметрах запроса"),
             @ApiResponse(responseCode = "404", description = "URL неверный или такого действия нет в веб-приложении"),
             @ApiResponse(responseCode = "500", description = "во время выполнения запроса произошла ошибка на сервере")})
     @GetMapping(value = "/export")
     public ResponseEntity<InputStreamResource> downloadRecipesDataFile() throws FileNotFoundException {
+        File dataFile = fileService.getRecipesDataFilePath();
+        if (dataFile.exists()) {
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(dataFile));
+            return ResponseEntity.ok()
+                    .contentLength(dataFile.length())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Recipes.json\"")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(resource);
+        } else {
+            return ResponseEntity.noContent().build();
+        }
+    }
+
+    @Operation(summary = "Скачивание списка рецептов в текстовом формате")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "всё хорошо, запрос выполнился"),
+            @ApiResponse(responseCode = "400", description = "есть ошибка в параметрах запроса"),
+            @ApiResponse(responseCode = "404", description = "URL неверный или такого действия нет в веб-приложении"),
+            @ApiResponse(responseCode = "500", description = "во время выполнения запроса произошла ошибка на сервере")})
+    @GetMapping(value = "/download")
+    public ResponseEntity<InputStreamResource> downloadUserRecipesDataFile() throws FileNotFoundException {
         File dataFile = fileService.getUserRecipesDataFilePath();
         if (dataFile.exists()) {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(dataFile));
