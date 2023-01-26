@@ -26,7 +26,7 @@ public class FileController {
         this.fileService = fileService;
     }
 
-    @Operation(summary = "Выгрузка списка рецептов")
+    @Operation(summary = "Скачивание списка рецептов")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "всё хорошо, запрос выполнился"),
             @ApiResponse(responseCode = "400", description = "есть ошибка в параметрах запроса"),
             @ApiResponse(responseCode = "404", description = "URL неверный или такого действия нет в веб-приложении"),
