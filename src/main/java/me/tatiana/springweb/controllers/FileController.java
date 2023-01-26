@@ -38,8 +38,8 @@ public class FileController {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(dataFile));
             return ResponseEntity.ok()
                     .contentLength(dataFile.length())
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Recipes.json\"")
-                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Recipes.txt\"")
+                    .contentType(MediaType.TEXT_PLAIN)
                     .body(resource);
         } else {
             return ResponseEntity.noContent().build();
